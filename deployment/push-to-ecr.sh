@@ -50,6 +50,8 @@ echo ""
 
 # Step 2: Build Docker image
 echo "Step 2: Building Docker image..."
+# Change to project root directory (parent of deployment folder)
+cd "$(dirname "$0")/.."
 docker build -t ${IMAGE_NAME} .
 
 if [ $? -ne 0 ]; then

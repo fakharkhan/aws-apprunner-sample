@@ -112,6 +112,7 @@ aws apprunner update-service \
 
 Check deployment status:
 ```bash
+cd deployment
 ./check-deployment.sh
 ```
 
@@ -147,6 +148,7 @@ To update your application:
 1. Make changes to your code
 2. Rebuild and push to ECR:
    ```bash
+   cd deployment
    ./push-to-ecr.sh
    ```
 3. App Runner will automatically detect the new image and deploy (if Auto-deploy is enabled)
