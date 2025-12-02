@@ -14,9 +14,11 @@ PORT=${PORT:-8000}
 echo "PORT environment variable: ${PORT}"
 
 # Update nginx to listen on the PORT from environment variable
-echo "Configuring nginx to listen on port ${PORT}..."
-sed -i "s/listen 8000 default_server/listen ${PORT} default_server/g" /etc/nginx/nginx.conf
-sed -i "s/\[::\]:8000 default_server/[::]:${PORT} default_server/g" /etc/nginx/nginx.conf
+echo "Configuring nginx to listen on 0.0.0.0:${PORT}..."
+# Replace any existing listen directives with the new port
+sed -i "s/listen 0\.0\.0\.0:[0-9]\+ default_server/listen 0.0.0.0:${PORT} default_server/g" /etc/nginx/nginx.conf
+sed -i "s/listen [0-9]\+ default_server/listen 0.0.0.0:${PORT} default_server/g" /etc/nginx/nginx.conf
+sed -i "s/\[::\]:[0-9]\+ default_server/[::]:${PORT} default_server/g" /etc/nginx/nginx.conf
 
 # Create necessary directories
 mkdir -p /var/log/nginx /var/log/supervisor /var/run
@@ -67,5 +69,5 @@ echo "=========================================="
 echo "Starting services with Supervisor..."
 echo "=========================================="
 
-# Start supervisor (will run in foreground, managing nginx and PHP-FPM)
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# Start supervisor in foreground mode (critical for container to stay alive)
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf -n
