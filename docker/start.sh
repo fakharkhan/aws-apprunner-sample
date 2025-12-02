@@ -53,9 +53,11 @@ EOF
 fi
 
 # Optimize Laravel for production (non-blocking)
+# Skip route:cache to avoid health check endpoint issues
 echo "Optimizing Laravel..."
 php artisan config:cache || true
-php artisan route:cache || true
+# Skip route:cache - it can cause health check endpoint to fail
+# php artisan route:cache || true
 php artisan view:cache || true
 
 # Test nginx configuration

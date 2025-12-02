@@ -4,8 +4,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # App Runner Service Details
-SERVICE_ARN="arn:aws:apprunner:eu-central-1:899735862078:service/aws-apprunner-sample/e27e2132ed704a63aad2b636d9290698"
-SERVICE_URL="https://q3k6ukarem.eu-central-1.awsapprunner.com"
+SERVICE_ARN="arn:aws:apprunner:eu-central-1:899735862078:service/aws-apprunner-sample/818a60900d6b457cb34bc6fad1243789"
+SERVICE_URL="https://rthdtnpbje.eu-central-1.awsapprunner.com"
 REGION="eu-central-1"
 
 echo "🚀 Checking App Runner Service Status..."
