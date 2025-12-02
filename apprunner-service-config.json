@@ -1,0 +1,35 @@
+{
+  "ServiceName": "aws-apprunner-sample",
+  "SourceConfiguration": {
+    "ImageRepository": {
+      "ImageIdentifier": "899735862078.dkr.ecr.eu-central-1.amazonaws.com/softpyramid/aws-apprunner-sample:latest",
+      "ImageConfiguration": {
+        "Port": "8000",
+        "RuntimeEnvironmentVariables": {
+          "APP_ENV": "production",
+          "APP_DEBUG": "false",
+          "APP_KEY": "base64:wD+4fqUVAkNtJ/zam2Gl2v8EEeZ7+XoLcdnTnQEo94s=",
+          "LOG_CHANNEL": "stderr"
+        }
+      },
+      "ImageRepositoryType": "ECR"
+    },
+    "AutoDeploymentsEnabled": true,
+    "AuthenticationConfiguration": {
+      "AccessRoleArn": "arn:aws:iam::899735862078:role/service-role/AppRunnerECRAccessRole"
+    }
+  },
+  "InstanceConfiguration": {
+    "Cpu": "1 vCPU",
+    "Memory": "2 GB"
+  },
+  "HealthCheckConfiguration": {
+    "Protocol": "HTTP",
+    "Path": "/health",
+    "Interval": 10,
+    "Timeout": 5,
+    "HealthyThreshold": 1,
+    "UnhealthyThreshold": 5
+  }
+}
+
