@@ -6,6 +6,7 @@
       "ImageConfiguration": {
         "Port": "8000",
         "RuntimeEnvironmentVariables": {
+          "PORT": "8000",
           "APP_ENV": "production",
           "APP_DEBUG": "false",
           "APP_KEY": "base64:wD+4fqUVAkNtJ/zam2Gl2v8EEeZ7+XoLcdnTnQEo94s=",
@@ -26,10 +27,10 @@
   "HealthCheckConfiguration": {
     "Protocol": "HTTP",
     "Path": "/health",
-    "Interval": 10,
-    "Timeout": 5,
+    "Interval": 20,
+    "Timeout": 10,
     "HealthyThreshold": 1,
-    "UnhealthyThreshold": 5
+    "UnhealthyThreshold": 10
   }
 }
 

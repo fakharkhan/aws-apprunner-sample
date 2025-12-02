@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # App Runner Service Details
-SERVICE_ARN="arn:aws:apprunner:eu-central-1:899735862078:service/aws-apprunner-sample/8a2138917ec04213b1d36f1be2e472f2"
-SERVICE_URL="https://pmghbtdqp2.eu-central-1.awsapprunner.com"
+SERVICE_ARN="arn:aws:apprunner:eu-central-1:899735862078:service/aws-apprunner-sample/e27e2132ed704a63aad2b636d9290698"
+SERVICE_URL="https://q3k6ukarem.eu-central-1.awsapprunner.com"
 REGION="eu-central-1"
 
 echo "🚀 Checking App Runner Service Status..."
@@ -24,16 +24,16 @@ if [ "$STATUS" = "RUNNING" ]; then
   echo ""
   echo "Testing endpoints..."
   echo ""
-  
+
   echo "1. Health Check:"
   curl -s "${SERVICE_URL}/health" | python3 -m json.tool 2>/dev/null || curl -s "${SERVICE_URL}/health"
   echo ""
   echo ""
-  
+
   echo "2. Root Endpoint:"
   curl -I "${SERVICE_URL}/" 2>&1 | head -5
   echo ""
-  
+
   echo "🎉 Your application is live at: ${SERVICE_URL}"
 elif [ "$STATUS" = "OPERATION_IN_PROGRESS" ] || [ "$STATUS" = "CREATE_FAILED" ] || [ "$STATUS" = "UPDATE_FAILED" ]; then
   echo "⏳ Service is still deploying or has issues..."
