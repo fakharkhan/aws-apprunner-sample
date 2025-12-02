@@ -26,8 +26,7 @@
     "Memory": "2 GB"
   },
   "HealthCheckConfiguration": {
-    "Protocol": "HTTP",
-    "Path": "/health",
+    "Protocol": "TCP",
     "Interval": 10,
     "Timeout": 5,
     "HealthyThreshold": 1,
