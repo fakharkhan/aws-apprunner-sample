@@ -1,48 +1,71 @@
 #!/bin/sh
-# Don't exit on error for Laravel commands, but ensure nginx starts
+# Simplified startup script for Laravel on AWS App Runner
+# Based on best practices from Laravel App Runner deployment guides
 
-# Log to stderr (App Runner will capture this)
-echo "Starting Laravel application..." >&2
+# All output to stderr so App Runner captures it
+exec 1>&2
 
-# Set PORT from environment variable or default to 8000
+echo "=========================================="
+echo "Starting Laravel Application on App Runner"
+echo "=========================================="
+
+# Get PORT from environment (App Runner sets this)
 PORT=${PORT:-8000}
-export PORT
-echo "Using PORT: ${PORT}" >&2
+echo "PORT environment variable: ${PORT}"
 
-# Replace PORT in nginx.conf with the actual port
-echo "Configuring nginx to listen on port ${PORT}..." >&2
-sed -i "s/listen 8000/listen ${PORT}/g" /etc/nginx/nginx.conf
-sed -i "s/\[::\]:8000/[::]:${PORT}/g" /etc/nginx/nginx.conf
+# Update nginx to listen on the PORT from environment variable
+echo "Configuring nginx to listen on port ${PORT}..."
+sed -i "s/listen 8000 default_server/listen ${PORT} default_server/g" /etc/nginx/nginx.conf
+sed -i "s/\[::\]:8000 default_server/[::]:${PORT} default_server/g" /etc/nginx/nginx.conf
 
-# Ensure nginx log directory exists
-mkdir -p /var/log/nginx /var/log/supervisor
+# Create necessary directories
+mkdir -p /var/log/nginx /var/log/supervisor /var/run
 
-# Set permissions
-echo "Setting permissions..." >&2
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/log/nginx /var/log/supervisor
+# Set permissions for Laravel
+echo "Setting Laravel permissions..."
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage
 chmod -R 775 /var/www/html/bootstrap/cache
 
-# Create .env file if it doesn't exist
+# Handle .env file
 if [ ! -f /var/www/html/.env ]; then
-    echo "Creating .env file from .env.example..." >&2
-    cp /var/www/html/.env.example /var/www/html/.env
-    php artisan key:generate --force || echo "Warning: Failed to generate APP_KEY" >&2
+    echo "Creating .env file..."
+    if [ -f /var/www/html/.env.example ]; then
+        cp /var/www/html/.env.example /var/www/html/.env
+    else
+        echo "Warning: .env.example not found, creating minimal .env"
+        cat > /var/www/html/.env <<EOF
+APP_NAME=Laravel
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+LOG_CHANNEL=stderr
+EOF
+    fi
+    
+    # Generate APP_KEY if not provided via environment variable
+    if [ -z "$APP_KEY" ]; then
+        echo "Generating APP_KEY..."
+        php artisan key:generate --force
+    fi
 fi
 
-# Cache configuration for better performance (only if .env exists)
-if [ -f /var/www/html/.env ]; then
-    echo "Caching Laravel configuration..." >&2
-    php artisan config:cache || echo "Warning: Config cache failed" >&2
-    php artisan route:cache || echo "Warning: Route cache failed" >&2
-    php artisan view:cache || echo "Warning: View cache failed" >&2
-fi
+# Optimize Laravel for production (non-blocking)
+echo "Optimizing Laravel..."
+php artisan config:cache || true
+php artisan route:cache || true
+php artisan view:cache || true
 
 # Test nginx configuration
-echo "Testing nginx configuration..." >&2
-nginx -t || (echo "ERROR: nginx configuration test failed!" >&2 && exit 1)
+echo "Testing nginx configuration..."
+if ! nginx -t; then
+    echo "ERROR: nginx configuration test failed!"
+    exit 1
+fi
 
-# Start supervisor (which manages PHP-FPM and Nginx)
-echo "Starting supervisor..." >&2
+echo "=========================================="
+echo "Starting services with Supervisor..."
+echo "=========================================="
+
+# Start supervisor (will run in foreground, managing nginx and PHP-FPM)
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
-
