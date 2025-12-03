@@ -45,9 +45,11 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 # Copy supervisor configuration
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Copy startup script
+# Copy startup scripts
 COPY docker/start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
+COPY docker/start-minimal.sh /usr/local/bin/start-minimal.sh
+COPY docker/start-php-server.sh /usr/local/bin/start-php-server.sh
+RUN chmod +x /usr/local/bin/start.sh /usr/local/bin/start-minimal.sh /usr/local/bin/start-php-server.sh
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -57,6 +59,6 @@ RUN chown -R www-data:www-data /var/www/html \
 # Expose port 8000 (App Runner uses PORT environment variable)
 EXPOSE 8000
 
-# Use supervisor to manage processes
-CMD ["/usr/local/bin/start.sh"]
+# Try PHP built-in server for simplest setup
+CMD ["/usr/local/bin/start-php-server.sh"]
 

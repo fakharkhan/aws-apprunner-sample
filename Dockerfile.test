@@ -1,0 +1,15 @@
+# Ultra-minimal test - just respond on port 8000
+FROM alpine:latest
+
+RUN apk add --no-cache nginx
+
+# Create simple response
+RUN echo 'OK' > /var/www/localhost/htdocs/index.html
+
+# Configure nginx for port 8000
+RUN sed -i 's/listen 80;/listen 8000;/' /etc/nginx/httpd.conf
+
+EXPOSE 8000
+
+CMD ["nginx", "-g", "daemon off;"]
+

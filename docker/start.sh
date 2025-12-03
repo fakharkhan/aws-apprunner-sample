@@ -1,6 +1,6 @@
 #!/bin/sh
-# Simplified startup script for Laravel on AWS App Runner
-# Based on best practices from Laravel App Runner deployment guides
+# Optimized startup script for Laravel on AWS App Runner
+# Starts services quickly to pass health checks
 
 # All output to stderr so App Runner captures it
 exec 1>&2
@@ -15,7 +15,6 @@ echo "PORT environment variable: ${PORT}"
 
 # Update nginx to listen on the PORT from environment variable
 echo "Configuring nginx to listen on 0.0.0.0:${PORT}..."
-# Replace any existing listen directives with the new port
 sed -i "s/listen 0\.0\.0\.0:[0-9]\+ default_server/listen 0.0.0.0:${PORT} default_server/g" /etc/nginx/nginx.conf
 sed -i "s/listen [0-9]\+ default_server/listen 0.0.0.0:${PORT} default_server/g" /etc/nginx/nginx.conf
 sed -i "s/\[::\]:[0-9]\+ default_server/[::]:${PORT} default_server/g" /etc/nginx/nginx.conf
@@ -23,42 +22,26 @@ sed -i "s/\[::\]:[0-9]\+ default_server/[::]:${PORT} default_server/g" /etc/ngin
 # Create necessary directories
 mkdir -p /var/log/nginx /var/log/supervisor /var/run
 
-# Set permissions for Laravel
+# Set permissions for Laravel (minimal, fast)
 echo "Setting Laravel permissions..."
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-chmod -R 775 /var/www/html/storage
-chmod -R 775 /var/www/html/bootstrap/cache
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
 
-# Handle .env file
+# Create minimal .env file quickly (don't wait for key generation)
 if [ ! -f /var/www/html/.env ]; then
-    echo "Creating .env file..."
-    if [ -f /var/www/html/.env.example ]; then
-        cp /var/www/html/.env.example /var/www/html/.env
-    else
-        echo "Warning: .env.example not found, creating minimal .env"
-        cat > /var/www/html/.env <<EOF
+    echo "Creating minimal .env file..."
+    cat > /var/www/html/.env <<EOF
 APP_NAME=Laravel
 APP_ENV=production
-APP_KEY=
+APP_KEY=${APP_KEY:-base64:tempkey}
 APP_DEBUG=false
 LOG_CHANNEL=stderr
 EOF
-    fi
-    
-    # Generate APP_KEY if not provided via environment variable
+    # Generate APP_KEY in background if not provided
     if [ -z "$APP_KEY" ]; then
-        echo "Generating APP_KEY..."
-        php artisan key:generate --force
+        (php artisan key:generate --force 2>/dev/null || true) &
     fi
 fi
-
-# Optimize Laravel for production (non-blocking)
-# Skip route:cache to avoid health check endpoint issues
-echo "Optimizing Laravel..."
-php artisan config:cache || true
-# Skip route:cache - it can cause health check endpoint to fail
-# php artisan route:cache || true
-php artisan view:cache || true
 
 # Test nginx configuration
 echo "Testing nginx configuration..."
@@ -72,4 +55,5 @@ echo "Starting services with Supervisor..."
 echo "=========================================="
 
 # Start supervisor in foreground mode (critical for container to stay alive)
+# Supervisor will start nginx and PHP-FPM quickly
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf -n
