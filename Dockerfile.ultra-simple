@@ -1,0 +1,8 @@
+FROM alpine:latest
+RUN apk add --no-cache nginx
+RUN mkdir -p /var/www/html
+RUN echo 'OK' > /var/www/html/index.html
+RUN echo 'events {} http { server { listen 0.0.0.0:8000; root /var/www/html; index index.html; location / { try_files $uri $uri/ =404; } } }' > /etc/nginx/nginx.conf
+EXPOSE 8000
+CMD ["nginx", "-g", "daemon off;"]
+
