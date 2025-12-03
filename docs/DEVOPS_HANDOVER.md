@@ -197,6 +197,8 @@ Check your configured port number.
 
 **Conclusion**: This appears to be an App Runner service-level or account-level networking issue, not an application issue.
 
+**📋 Complete Details**: See `docs/HEALTH_CHECK_ATTEMPTS.md` for detailed history of all 5+ attempts with configurations, results, and analysis.
+
 ### Test Results
 
 | Container Type | Local Docker | App Runner | Notes |
@@ -327,6 +329,8 @@ docker exec aws-apprunner-test netstat -tlnp | grep 8000
 - `deployment/DEPLOYMENT.md` - General deployment documentation
 - `deployment/README.md` - Deployment folder overview
 - `docs/DEVOPS_HANDOVER.md` - This file
+- `docs/HEALTH_CHECK_ATTEMPTS.md` - **Complete history of all health check attempts**
+- `docs/QUICK_REFERENCE.md` - Quick reference guide
 
 ---
 
